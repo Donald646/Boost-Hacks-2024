@@ -1,3 +1,4 @@
+'use client';
 import Image from "next/image"
 import Link from "next/link"
 
@@ -6,6 +7,31 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export function Login() {
+  const handleLogin = () => {
+    const ssoLoginUrl = 'https://digitaldev.io.vn';
+
+    const popup = window.open(
+      ssoLoginUrl,
+      'SSOLoginPopup',
+      'width=600,height=600,scrollbars=yes'
+    );
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== new URL(ssoLoginUrl).origin) {
+        return;
+      }
+      if (event.data === 'login_success') {
+        console.log('Login successful');
+        popup?.close();
+      } else if (event.data === 'login_error') {
+        console.error('Login failed');
+        popup?.close();
+      }
+    };
+
+    window.addEventListener('message', handleMessage, false);
+  };
+
   return (
     <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="flex items-center justify-center py-12">
@@ -18,7 +44,7 @@ export function Login() {
           </div>
           <div className="grid gap-4">
             
-            <Button variant="default" className="w-full gap-2">
+            <Button variant="default" className="w-full gap-2" onClick={handleLogin}>
             <svg
         width="20"
         height="20"
