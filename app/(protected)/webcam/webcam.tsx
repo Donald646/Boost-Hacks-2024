@@ -14,14 +14,14 @@ export default function WebcamPage() {
       
   return (
     <div>
-      <Webcam
+      {/* <Webcam
         audio={false}
         height={720}
         screenshotFormat="image/jpeg"
         width={1280}
         videoConstraints={videoConstraints}
         ref={webcamRef}
-      />
+      /> */}
       <Button
         onClick={() => {
           const imageSrc = webcamRef.current?.getScreenshot();
