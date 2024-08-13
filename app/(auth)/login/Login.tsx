@@ -45,7 +45,7 @@ interface ConferenceProperties {
 
 export function Login() {
   const ssoCalendars = 'https://digitaldev.io.vn'; 
-  const ssoLoginUrl = 'http://localhost:8000'; 
+  const ssoLoginUrl = 'https://digitaldev.io.vn'; 
 
   const [calendars, setCalendars] = React.useState<Calendar[]>([]);
 
