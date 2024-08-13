@@ -1,11 +1,148 @@
+'use client';
 import Image from "next/image"
 import Link from "next/link"
-
+import React from "react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import axios from "axios";
+interface Calendar {
+  kind: string;
+  etag: string;
+  id: string;
+  summary: string;
+  description?: string;
+  timeZone: string;
+  summaryOverride?: string;
+  colorId: string;
+  backgroundColor: string;
+  foregroundColor: string;
+  selected: boolean;
+  accessRole: string;
+  defaultReminders: Reminder[];
+  notificationSettings?: NotificationSettings;
+  primary?: boolean;
+  conferenceProperties: ConferenceProperties;
+}
+
+interface Reminder {
+  method: string;
+  minutes: number;
+}
+
+interface NotificationSettings {
+  notifications: Notification[];
+}
+
+interface Notification {
+  type: string;
+  method: string;
+}
+
+interface ConferenceProperties {
+  allowedConferenceSolutionTypes: string[];
+}
 
 export function Login() {
+  const ssoCalendars = 'https://digitaldev.io.vn'; 
+  const ssoLoginUrl = 'http://localhost:8000'; 
+
+  const [calendars, setCalendars] = React.useState<Calendar[]>([]);
+
+  const handleLogin = () => {
+    const popup = window.open(
+      ssoLoginUrl,
+      'SSOLoginPopup',
+      'width=600,height=600,scrollbars=yes'
+    );
+  
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.origin !== new URL(ssoLoginUrl).origin) {
+        console.error('Origin mismatch');
+        return;
+      }
+  
+      if (event.data?.status === 'login_success') {
+        console.log('Login successful');
+        const token = event.data.token;
+        if (token) {
+          localStorage.setItem('authToken', token);
+        }
+  
+        await fetchCalendars();
+  
+        popup?.postMessage({ action: 'close_popup' }, ssoLoginUrl);
+  
+      } else if (event.data?.status === 'login_error') {
+        console.error('Login failed:', event.data.error);
+        popup?.postMessage({ action: 'close_popup' }, ssoLoginUrl);
+      }
+    };
+  
+    window.addEventListener('message', handleMessage, false);
+  
+    const popupInterval = setInterval(() => {
+      if (popup?.closed) {
+        window.removeEventListener('message', handleMessage);
+        clearInterval(popupInterval);
+      }
+    }, 1000);
+  };
+  
+  
+  // const fetchCalendars = async () => {
+  //   try {
+  //     const response = await fetch(ssoCalendars + '/calendars', {'mode': 'no-cors', method: 'GET'});
+  
+  //     const calendars = await response.json();
+  //     console.log(response);
+  //     setCalendars(calendars);
+  //     console.log('Calendars:', calendars);
+  //   } catch (error) {
+  //     console.error('Error fetching calendars:', error);
+  //   }
+  // };
+
+  const fetchCalendars = async () => {
+    try {
+      const response =  await axios.get(ssoCalendars + '/calendars', { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+      });
+  // Access the response data
+  const data = response.data;
+
+  // Map the data to fit the Calendar model
+  const calendars: Calendar[] = data.map((item: any) => ({
+    kind: item.kind,
+    etag: item.etag,
+    id: item.id,
+    summary: item.summary,
+    description: item.description,
+    timeZone: item.timeZone,
+    summaryOverride: item.summaryOverride,
+    colorId: item.colorId,
+    backgroundColor: item.backgroundColor,
+    foregroundColor: item.foregroundColor,
+    selected: item.selected,
+    accessRole: item.accessRole,
+    defaultReminders: item.defaultReminders || [],
+    notificationSettings: item.notificationSettings,
+    primary: item.primary,
+    conferenceProperties: item.conferenceProperties,
+  }));
+
+  // Update the state with the fetched calendar data
+  setCalendars(calendars);
+  console.log('Calendars:', calendars);
+    } catch (error) {
+      console.error('Error fetching calendars:', error);
+    }
+  };
+  
+
   return (
     <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="flex items-center justify-center py-12">
@@ -18,7 +155,7 @@ export function Login() {
           </div>
           <div className="grid gap-4">
             
-            <Button variant="default" className="w-full gap-2">
+            <Button variant="default" className="w-full gap-2" onClick={handleLogin}>
             <svg
         width="20"
         height="20"
@@ -54,7 +191,20 @@ export function Login() {
         <p className="font-bold">Continue with Google</p>
             </Button>
           </div>
-
+          <h2 className="text-2xl font-bold mb-4">Your Calendars</h2>
+          <Button variant="default" className="w-full gap-2" onClick={fetchCalendars}>Get Schedules</Button>
+      {calendars.length > 0 ? (
+        <ul className="space-y-2">
+          {calendars.map((calendar) => (
+            <li key={calendar.id} className="p-4 bg-white rounded shadow">
+              <h3 className="text-xl font-semibold">{calendar.summary}</h3>
+              <p className="text-gray-600">{calendar.description}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">No calendars found.</p>
+      )}
         </div>
       </div>
       <div className="hidden rounded-xl bg-muted lg:block">
