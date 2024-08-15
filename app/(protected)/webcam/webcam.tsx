@@ -35,7 +35,7 @@ export default function WebcamPage() {
         )}
       </div>
       <div className="h-16 bg-black flex items-center justify-between px-4">
-        <div className='flex-1'></div>
+        <div className='flex-1'></div>  
         <div className='flex flex-row items-center justify-center gap-8'>
           <div className='flex flex-col items-center'>
             <p className='text-lg font-semibold'>3</p>

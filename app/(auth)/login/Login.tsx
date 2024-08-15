@@ -144,8 +144,8 @@ export function Login() {
   
 
   return (
-    <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-      <div className="flex items-center justify-center py-12">
+    <div className="w-full h-screen flex items-center justify-center lg:grid lg:grid-cols-2">
+      <div className="flex items-center justify-center">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Login</h1>
@@ -154,8 +154,7 @@ export function Login() {
             </p>
           </div>
           <div className="grid gap-4">
-            
-            <Button variant="default" className="w-full gap-2" onClick={handleLogin}>
+            <Button variant="outline" className="w-full gap-2 border-black" onClick={handleLogin}>
             <svg
         width="20"
         height="20"
@@ -207,9 +206,9 @@ export function Login() {
       )}
         </div>
       </div>
-      <div className="hidden rounded-xl bg-muted lg:block">
+      <div className="hidden rounded-xl h-full lg:block">
         <Image
-          src="/placeholder.svg"
+          src="/landingAngled.svg"
           alt="Image"
           width="1920"
           height="1080"
