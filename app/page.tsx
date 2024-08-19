@@ -31,7 +31,7 @@ export default function Home() {
                 <a href="#" className="text-gray-800 hover:text-gray-600">
                   Pricing
                 </a>
-                <a href="#" className="text-gray-800 hover:text-gray-600">
+                <a href="/webcam" className="text-gray-800 hover:text-gray-600">
                   Testimonials
                 </a>
                 <a href="#" className="text-gray-800 hover:text-gray-600">

@@ -27,6 +27,23 @@ interface Face {
   };
 }
 
+interface FaceRectangle {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+interface FaceDetect {
+  name: string;
+  probability: number;
+  rectangle: FaceRectangle;
+  uuid: string;
+  collections: string[];
+}
+
+type ApiResponseDb = FaceDetect[];
+
 interface ApiResponse {
   status: string;
   faces: Face[];
@@ -42,6 +59,7 @@ export default function WebcamPage() {
       };
     const webcamRef = React.useRef<Webcam>(null);
     const [responseData, setResponseData] = useState<ApiResponse | null>(null);
+    const [responseFaceData, setResponseFaceData] = useState<ApiResponseDb | null>(null);
 
     const sendImage = async () => {
       if (!image) {
@@ -69,11 +87,42 @@ export default function WebcamPage() {
           },
         });
         console.log(response.data);
+        sendImageDetectFace();
         setResponseData(response.data);
       } catch (error) {
         console.error('Error uploading photo:', error);
       }
     };
+
+    const sendImageDetectFace = async () => {
+      if (!image) {
+        alert('No image captured!');
+        return;
+      }
+    
+      const response = await fetch(image);
+      const blob = await response.blob();
+    
+      // Prepare the form data
+      const formData = new FormData();
+      formData.append('photo', blob, 'photo.jpg');
+      formData.append('collections', '');
+    
+      const url = 'https://api.luxand.cloud/photo/search/v2';
+      const headers = {
+        'token': process.env.NEXT_PUBLIC_FACE_TOKEN || '',
+      };
+    
+      try {
+        const response = await axios.post(url, formData, { headers });
+        console.log(response.data);
+        setResponseFaceData(response.data); // Update responseFaceData
+      } catch (error) {
+        console.error('Error uploading photo for face recognition:', error);
+      }
+    };
+    
+    
   
     
   
@@ -95,10 +144,24 @@ export default function WebcamPage() {
         {image && (
           <div className="absolute top-0 right-0 w-1/3 h-full overflow-auto p-4 bg-white bg-opacity-75">
             <img src={image} alt="Captured" className="w-full h-auto" />
-            {responseData && (
+            {responseFaceData && (
+              <div>
+                <div className="mt-6">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-800">Welcome Back 👋</h3>
+                  {responseFaceData.map((face, index) => (
+                    <div key={index} className="p-4 mb-4 border border-gray-300 rounded-md bg-white shadow-sm">
+                      <p className="text-lg font-medium mb-2"><strong>Name:</strong> {face.name}</p>
+                      <p className="text-md font-medium mb-1"><strong>Probability:</strong> {face.probability.toFixed(2)}</p>
+                      <p className="text-md font-medium mb-1"><strong>Region:</strong> X: {face.rectangle.left}, Y: {face.rectangle.top}, Width: {face.rectangle.right - face.rectangle.left}, Height: {face.rectangle.bottom - face.rectangle.top}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+             {responseData && (
           <div>
             <div className="mt-6">
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Face Details</h3>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">You are looking so ... 🤩</h3>
               {responseData.faces.map((face, index) => (
                 <div key={index} className="p-4 mb-4 border border-gray-300 rounded-md bg-white shadow-sm">
                   <p className="text-lg font-medium mb-2"><strong>Dominant Emotion:</strong> {face.dominant_emotion}</p>
